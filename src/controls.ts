@@ -6,11 +6,12 @@ import { compileExpression } from './expression.js';
 
 export const HELP = `I'm Audrey: a Discord companion experiment. Jev handles decisions; Gemini writes replies.
 Mention me, reply to me, or DM me. I only passively watch explicitly allowed channels or servers.
-Messages I process go to Vercel/TypeSafe and, for replies, the configured writer provider. Don't send secrets. No audio/image understanding yet.
+Messages I process go to Vercel/TypeSafe and, for replies, the configured writer provider. In the escape game, spoken lines also go to the configured voice service (Microsoft Edge TTS or Fish Audio). Don't send secrets. No audio/image understanding yet.
 Controls: !audrey dashboard | status | memory on | memory off | memories | approve <message-id> | remember <fact> | forget | diary | help
 Dashboard opens a shared, auto-refreshing experiment panel in this server channel (Manage Messages or bot owner). It shows decisions, expression, prompt blocks and budgets without publishing message text or memory contents.
 Memory is off unless you opt in or explicitly request it enabled by default. It lets me PROPOSE memories; approve them yourself. Memory is separate per person and channel/DM. "forget" deletes your local memory and clears this channel's short context (not provider logs).
 Server slash commands: /audrey. Admins: pause, resume, mode dry/live. Diary is a factual decision trace, not hidden thoughts.
+Game: /escape starts or resumes a text escape-room game in its own thread (status, end, forget are options).
 Outreach: DM !audrey outreach on/off to consent/revoke. Admins can propose USER_ID | exact text, inspect outbox, and send <proposal-id>. No automatic unsolicited DMs.`;
 export interface ControlContext { channelId: string; userId: string; canManage: boolean; canManageMode: boolean }
 export function control(engine: Engine, ctx: ControlContext, command: string, argument = ''): string {

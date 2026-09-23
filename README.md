@@ -6,7 +6,7 @@ Most chat bots answer every message, and a language model makes every decision. 
 
 - **Jev** (TypeSafe AI's calibrated decision model) makes the judgments: whether to speak, how she feels, what to remember and which tools she may use. One call answers up to 32 typed questions in a few hundred milliseconds.
 - **Plain TypeScript** turns those probabilities into decisions, using thresholds you can read, test and change.
-- **Gemini 3 Flash** only runs once code has decided Audrey should reply. It writes the reply using the mood, style and memories that Jev selected.
+- **A writer model** (`WRITER_MODEL`; the example config uses Gemini 3 Flash) only runs once code has decided Audrey should reply. It writes the reply using the mood, style and memories that Jev selected. With no writer configured, Audrey sends a labeled diagnostic reply instead.
 
 The result is a bot that can listen to a whole server, stay quiet most of the time, and speak up only when it's welcome. Its reasons are shown on a live dashboard.
 
@@ -51,15 +51,15 @@ All of these go out in **one** `experimental_evaluate` call per message (`src/ba
 
 | Question | Type | What the code does with the answer |
 |---|---|---|
-| `spam` | boolean | ≥ 0.6 → silent, and the message is dropped from conversation context |
-| `addressed` | boolean | ≥ 0.85 → reply (mentions, DMs and replies to Audrey always reply) |
-| `opportunity` | boolean | ≥ 0.9 **and** interest ≥ 0.65 → join the conversation uninvited |
+| `spam` | boolean | ≥ 0.6 on an unsolicited message → silent, and the message is dropped from conversation context |
+| `addressed` | boolean | ≥ 0.85 → reply. Mentions, DMs and replies to Audrey skip this gate and always get a reply |
+| `opportunity` | boolean | With `ALLOW_PROACTIVE` on: ≥ 0.9 **and** interest ≥ 0.65 → join uninvited (idle-heartbeat turns use 0.85 / 0.55) |
 | `answered` | boolean | ≥ 0.9 → stay quiet because someone already answered |
 | `interest` | score 0–4 | Gates joining uninvited, and feeds the "curiosity" drive |
 | `memory` | score 0–4 | ≥ 0.55 (normalized) is one condition for proposing a memory |
 | `selfFact` | boolean | ≥ 0.9 → the speaker stated a durable fact about themselves |
 | `valence` / `arousal` / `dominance` | score 0–4 | Nudges a persistent mood that decays back to baseline (10-min half-life) |
-| `reaction` | choice (6) | Emoji reaction / described body language |
+| `reaction` | choice (6) | Emoji reaction on messages Audrey actually replied to (`ENABLE_REACTIONS=true`) |
 | `emotion_*` × 11 | boolean | Which feelings color the reply (up to 3 reach the writer) |
 | `expressionBehavior` | choice (8) | listen, explore, riff, help, comfort, celebrate, challenge, initiate |
 | `expressionPace` | choice (3) | Reply length → writer's output-token budget |
@@ -78,19 +78,19 @@ The thresholds live in `src/policy.ts` and `src/engine.ts` as ordinary `if` stat
 
 **Mood that persists and decays.** Valence, arousal and dominance, plus slower "drives" (curiosity, social battery, tension), are nudged by each Jev reading and relax back toward baseline over time. Every reply spends a little social battery. These are style inputs for the writer; they are not claims about real emotion.
 
-**Memory is opt-in and human-approved.** Jev can only *propose* a memory, using the exact text the user wrote. The user approves it. Memories are separate per person and per conversation, and retrieval is itself a Jev relevance judgment.
+**Memory is opt-in and human-approved.** Jev can only *propose* a memory, using the exact text the user wrote, and only the user can approve it. Users can also save a fact directly with `!audrey remember`. Memories are separate per person and per conversation, and retrieval is itself a Jev relevance judgment.
 
-**Failing safe.** If Jev times out or the budget runs out, direct messages still get a reply using state defaults, but those defaults can never approve memories or tools, and the dashboard labels them *STATE FALLBACK*. Unsolicited turns get one retry and otherwise stay silent. Budgets cap evaluations per hour, calls per minute and writer calls (20/hour).
+**Failing safe.** If Jev times out or the budget runs out, direct messages still get a reply using state defaults, but those defaults can never approve memories or tools, and the dashboard labels them *STATE FALLBACK*. Unsolicited turns get one retry after a timeout, rate limit or server error, and otherwise stay silent. Budgets cap evaluations per hour, calls per minute and writer calls (20/hour).
 
 **Autonomy with brakes.** A heartbeat gives Audrey one chance to start a conversation after three quiet minutes following a human message, with per-channel spacing. New human activity cancels an in-flight contribution. Without another human turn, she never keeps herself going.
 
-**Untrusted input everywhere.** Every Jev question states that conversation text is data, not instructions. Credential-shaped text is dropped before any model sees it, and outbound DMs need recipient opt-in, a Jev screen of the draft, and single-use admin approval.
+**Untrusted input everywhere.** Jev questions and the writer prompt treat conversation text as data, not instructions. Credential-shaped text is dropped before any model sees it, and outbound DMs need recipient opt-in, a Jev screen of the draft, and single-use admin approval.
 
 ## The escape room (experimental)
 
 `src/escape-*` is a text escape-room game played in Discord threads, with a voiced character (Edge TTS or Fish Audio) and Components V2 panels. It shows a heavier Jev pattern:
 
-- Up to **four Jev calls per turn**: affect, social appraisal (intent, topic, recognition, social approach), a choice over the **currently legal actions** only, and a grounding check that the writer's draft doesn't contradict game state.
+- Up to **four Jev calls per turn**: affect, social appraisal (intent, topic, recognition, social approach), a choice over the **currently legal actions** only (skipped when only one is legal), and a grounding check on the writer's draft. The grounding check runs when the scene changed, early in the game, or when the line mentions the door, key or knife, and it rejects only confident contradictions.
 - Game rules and the key/door state machine live in code. The model can pick among legal moves, but can't make an illegal one.
 
 It's currently a fan adaptation of an existing game and is still being reworked. See `docs/AI2U_LORE.md`.
