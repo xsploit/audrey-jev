@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Audrey · Voice Lab</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body>
+<div class="shell">
+  <header><div class="brand"><span class="mark">a.</span><div><span class="eyebrow">AUDREY / AUDIO TOOLS</span><h1>Voice lab<span>.</span></h1></div></div><span class="local"><i></i> LOCAL TESTER</span></header>
+  <p class="intro">Find her voice. Adjust, listen, compare.</p>
+  <main>
+    <section class="panel controls" aria-labelledby="tuning-title">
+      <div class="section-heading"><h2 id="tuning-title">01 <span>The voice</span></h2><button id="reset" class="quiet" type="button">Reset tuning ↺</button></div>
+      <div class="provider-switch" role="group" aria-label="Speech provider"><button type="button" data-provider="edge" aria-pressed="true">Edge TTS</button><button type="button" data-provider="fish" aria-pressed="false">Fish S2.1 Free</button></div>
+      <div id="edge-settings">
+      <label for="voice">Voice</label><select id="voice"><option value="en-US-AriaNeural">Aria · en-US</option><option value="en-US-JennyNeural">Jenny · en-US</option><option value="en-US-AnaNeural">Ana · en-US</option><option value="en-US-MichelleNeural">Michelle · en-US</option><option value="en-GB-SoniaNeural">Sonia · en-GB</option></select>
+      <div class="voice-tools"><input id="voice-filter" type="search" placeholder="Find a voice…" aria-label="Filter voices"><label class="check"><input id="english" type="checkbox" checked> English only</label></div>
+      <small id="voice-status">Loading Microsoft’s voice catalogue…</small>
+      <div class="knob"><div class="knob-label"><label for="pitch">Pitch <small>higher / lower</small></label><div class="number"><input id="pitch-value" aria-label="Pitch in Hz" type="number" min="-50" max="100" step="1" value="26"><span>Hz</span></div></div><input id="pitch" type="range" min="-50" max="100" step="1" value="26"><div class="range-labels"><span>−50 Hz</span><span>+100 Hz</span></div></div>
+      <div class="knob"><div class="knob-label"><label for="rate">Speed <small>slower / faster</small></label><div class="number"><input id="rate-value" aria-label="Speed percentage" type="number" min="-50" max="100" step="1" value="3"><span>%</span></div></div><input id="rate" type="range" min="-50" max="100" step="1" value="3"><div class="range-labels"><span>−50%</span><span>+100%</span></div></div>
+      <div class="knob"><div class="knob-label"><label for="volume">Volume <small>synthesis level</small></label><div class="number"><input id="volume-value" aria-label="Volume percentage" type="number" min="-50" max="50" step="1" value="0"><span>%</span></div></div><input id="volume" type="range" min="-50" max="50" step="1" value="0"><div class="range-labels"><span>−50%</span><span>+50%</span></div></div>
+      <div class="presets"><span class="eyebrow">QUICK PITCH</span><div><button type="button" data-pitch="0">Natural · 0</button><button type="button" data-pitch="26">Current · +26</button><button type="button" data-pitch="60">High · +60</button></div></div>
+      </div>
+      <div id="fish-settings" hidden><label for="fish-reference">Reference voice ID</label><input id="fish-reference" type="text" maxlength="32" value="ee4867b6908d41e58ee7736ce4874622" spellcheck="false"><p id="fish-status"></p><div class="fish-note"><span class="eyebrow">EXPRESSION IN THE TEXT</span><p>Use tags such as <code>[excited]</code>, <code>[laughing]</code> or <code>[whisper]</code> to shape delivery.</p><p>The selected model is <strong>s2.1-pro-free</strong>. Edge’s pitch and speed sliders do not apply to Fish.</p></div></div>
+      <button id="copy" class="secondary" type="button">Copy settings for Audrey <span>↗</span></button>
+      <small id="copy-status">Preview only. Your live bot settings stay as they are.</small>
+      <textarea id="config-export" aria-label="Settings to copy" hidden readonly></textarea>
+    </section>
+    <div class="right-column">
+      <section class="panel script" aria-labelledby="script-title">
+        <div class="section-heading"><h2 id="script-title">02 <span>Give her a line</span></h2><span id="count" class="counter">0 / 1500</span></div>
+        <textarea id="text" maxlength="1500" aria-label="Dialogue to speak" spellcheck="false">Don't say that. That makes me embarrassed!</textarea>
+        <div class="samples"><button type="button" data-sample="reference">Reference line</button><button type="button" data-sample="warm">Warm</button><button type="button" data-sample="tease">Teasing</button><button type="button" data-sample="quiet">Quiet</button></div>
+        <div id="fish-tags" class="samples" hidden><button type="button" data-tag="[excited]">+ excited</button><button type="button" data-tag="[laughing]">+ laughing</button><button type="button" data-tag="[whisper]">+ whisper</button><button type="button" id="fish-example">Fish example line</button></div>
+        <div class="generate-row"><button id="generate" type="button" class="primary" disabled><span>▶</span> Generate & listen</button><button id="cancel" type="button" class="quiet" hidden>Cancel</button><label class="check"><input id="autoplay" type="checkbox" checked> Autoplay</label></div>
+        <p id="status" role="status" aria-live="polite">Connecting to the tester…</p>
+      </section>
+      <section class="panel playback" aria-labelledby="playback-title">
+        <div class="section-heading"><h2 id="playback-title">03 <span>Listen closely</span></h2><span id="source-quality" class="quality">ORIGINAL AUDIO · MP3</span></div>
+        <div id="empty-player" class="empty"><span class="sound-icon">▂ ▅ ▃ ▇ ▄ ▆ ▂</span><p>Your next take starts here.</p><small>Tweak a setting, then generate a preview.</small></div>
+        <div id="current" hidden><div id="current-label" class="take-label"></div><audio id="player" controls preload="metadata"></audio><div class="player-footer"><span id="current-meta"></span><a id="download" download="audrey-take.mp3">Download MP3 ↓</a></div></div>
+        <div class="reference"><div class="reference-heading"><div><span class="eyebrow">A / B REFERENCE</span><p id="reference-label">Add a clip to compare against</p></div><label class="upload">Choose audio<input type="file" id="reference-file" accept="audio/*"></label></div><audio id="reference-player" controls preload="metadata" hidden></audio><small>Your chosen reference stays in this browser.</small></div>
+      </section>
+    </div>
+    <section class="panel takes" aria-labelledby="takes-title"><div class="section-heading"><h2 id="takes-title">04 <span>Compare your takes</span></h2><button id="clear" type="button" class="quiet">Clear takes</button></div><div id="takes"><p class="empty-takes">Your last six takes will appear here, each with its own settings.</p></div></section>
+  </main>
+  <footer><span><i></i> Online synthesis · Microsoft Edge / Fish Audio</span><span>Original MP3 output · No artificial quality upscaling</span></footer>
+</div>
+</body></html>

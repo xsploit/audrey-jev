@@ -1,0 +1,30 @@
+{
+  "name": "jev-discord-demo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "tsx src/bot.ts",
+    "demo": "tsx src/simulate.ts",
+    "context:demo": "tsx src/context-smoke.ts",
+    "escape:demo": "tsx src/escape-smoke.ts",
+    "voice:lab": "tsx src/tts-lab.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/gateway": "^4.0.87",
+    "ai": "^7.0.107",
+    "discord.js": "^14.27.0",
+    "dotenv": "^18.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
